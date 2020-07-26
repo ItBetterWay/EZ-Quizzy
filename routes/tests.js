@@ -1,9 +1,9 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET home page. */
+/* GET tests page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'EZ-Quizzy' });
+    res.render('tests', { title: 'EZ-Quizzy' });
 });
 
 module.exports = router;
