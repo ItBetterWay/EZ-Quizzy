@@ -6,6 +6,12 @@ var logger = require('morgan');
 var hbs = require('express-handlebars');
 const mongoose = require('mongoose');
 const fileUpload = require('express-fileupload');
+const session = require('express-session');
+const bodyParser = require('body-parser');
+const passport = require('passport');
+const flash = require('connect-flash');
+const MongoStore = require('connect-mongo')(session);
+require('./config/passport')(passport);
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -21,19 +27,30 @@ app.engine('hbs', hbs({extname: 'hbs', defaultLayout: 'layout', layoutsDir: __di
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
-app.use(fileUpload());
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(session({
+  secret: 'ezQuizzySecret',
+  saveUninitialized: true,
+  resave: true,
+  store: new MongoStore({
+    mongooseConnection: mongoose.connection,
+    ttl: 2 * 24 * 60 * 60
+  })
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
+app.use(fileUpload());
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/tests', testsRouter);
 app.use('/login', loginRouter);
-
 app.use('/upload', uploadRouter);
 
 // catch 404 and forward to error handler

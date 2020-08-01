@@ -3,7 +3,11 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    res.render('upload', { title: 'EZ-Quizzy', success: '' });
+    if(req.user){
+        let userName = req.user.local.userName;
+        return res.render('upload', { title: 'EZ-Quizzy', success: '', user: userName });
+      }
+    res.render('upload', { title: 'EZ-Quizzy', success: ''});
 });
 
 router.post('/submit', function (req, res, next) {
