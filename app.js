@@ -10,6 +10,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const flash = require('connect-flash');
+const MongoStore = require('connect-mongo')(session);
 require('./config/passport')(passport);
 
 var indexRouter = require('./routes/index');
@@ -34,7 +35,11 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(session({
   secret: 'ezQuizzySecret',
   saveUninitialized: true,
-  resave: true
+  resave: true,
+  store: new MongoStore({
+    mongooseConnection: mongoose.connection,
+    ttl: 2 * 24 * 60 * 60
+  })
 }));
 app.use(passport.initialize());
 app.use(passport.session());

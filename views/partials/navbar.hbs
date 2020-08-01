@@ -22,15 +22,19 @@
 
             </ul>
             <ul class="nav justify-content-end">
+                {{#if user}}
+                <li class="nav-item">
+                    <a class="nav-link" href="/login/logout">Log out</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/users" tabindex="-1" aria-disabled="true">User {{user}}</a>
+                </li>
+                {{else}}
                 <li class="nav-item">
                     <a class="nav-link active" href="/login">Log in</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Log out</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">User name</a>
-                </li>
+                {{/if}}
+                
             </ul>
 
         </div>

@@ -18,6 +18,11 @@ let TestsData = mongoose.model('test', testDataSchema);
 
 /* GET tests page. */
 router.get('/', function(req, res, next) {
+    if(req.user){
+        let ID = '';
+        let userName = req.user.local.userName;
+        return res.render('tests', { title: ID, user: userName });
+      }
     TestsData.find()
         .then(function (doc) {
             let ID = '';

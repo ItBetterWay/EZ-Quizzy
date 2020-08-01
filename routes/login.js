@@ -5,11 +5,20 @@ var passport = require('passport');
 
 /* GET login page. */
 router.get('/', function(req, res, next) {
-    console.log(req.cookies);
-    console.log('=======-------------');
-    console.log(req.session);
-    res.render('login', { message: 'Log in' });
+    // console.log(req.user);
+    // console.log('=======-------------');
+    // console.log(req.session);
+    //res.render('login', { message: 'Log in' });
+    res.locals.message = req.flash('loginMessage');
+    res.render('login');
 });
+
+// Implement login
+router.post('/', passport.authenticate('local-login', {
+    successRedirect: '/users',
+    failureRedirect: '/login',
+    failureFlash: true
+}));
 
 // Refistration page
 router.get('/signup', function(req, res, next) {
@@ -23,5 +32,11 @@ router.post('/signup', passport.authenticate('local-signup', {
     failureRedirect: '/login/signup',
     failureFlash: true
 }));
+
+// Logout page
+router.get('/logout', function(req, res) {
+    req.logout();
+    res.redirect('/');
+});
 
 module.exports = router;
