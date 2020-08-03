@@ -1,7 +1,12 @@
+{{#each testsName}}
 <div class="jumbotron mt-5">
     <div class="container">
-        <h1 class="display-3">Tests page {{title}}</h1>
-        <p class="lead">Welcome to {{title}}</p>
-        <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more &raquo;</a></p>
+        <h1 class="display-3">Tests: {{this}}</h1>
+        <p class="lead">Analitics or let's start {{this}}</p>
+        
+        <form action="/tests/get-tests" method="POST">
+            <p><button class="btn btn-primary btn-lg" name="btnVal" value="{{this}}" role="button" type="submit" formmethod="POST">Get started &raquo;</button></p>
+        </form>
     </div>
 </div>
+{{/each}}

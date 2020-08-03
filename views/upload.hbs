@@ -12,7 +12,7 @@
                 <div class="input-group-prepend">
                     <div class="input-group-text">Enter test name</div>
                 </div>
-                <input type="text" class="form-control" name="testName" id="testName" placeholder="IT test, Biology test, etc...">
+                <input type="text" class="form-control" name="testName" id="testName" placeholder="IT test, Biology test, etc..." required>
             </div>
             <div class="input-group mt-4">
                 <div class="input-group-prepend">
@@ -20,13 +20,13 @@
                 </div>
                 <div class="custom-file">
                     <input type="file" class="custom-file-input" name="myFile" id="inputFile"
-                           aria-describedby="inputFile">
+                           aria-describedby="inputFile" required>
                     <label class="custom-file-label" for="inputFile">Choose file</label>
                 </div>
             </div>
             <div class="row">
                 <div class="col text-center">
-            <button class="btn btn-lg btn-primary mt-4" type="submit" id="test">Upload</button>
+                    <button class="btn btn-lg btn-primary mt-4" type="submit" id="test">Upload</button>
                 </div>
             </div>
         </form>
