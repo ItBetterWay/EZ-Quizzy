@@ -25,6 +25,7 @@ router.post('/submit', function (req, res, next) {
         let fileName = file.name;
         
         //Save file to uploads folder
+        //FIXME: Needs to check if uploads folder exists, if not create one
         file.mv('./uploads/' + fileName, function (err) {
             if(err){
                 return res.status(400).send(err);
@@ -38,7 +39,8 @@ router.post('/submit', function (req, res, next) {
                     });
                 }
                 //Implementation for reading each block QA
-                readBlock(function (err, data){
+                readBlock(async function (err, data){
+                    let testId;
                     //Check and Print error
                     if(err){
                         console.log(err.message);
@@ -55,6 +57,18 @@ router.post('/submit', function (req, res, next) {
                         clearStr += str[i]; 
                     }
 
+                    // Find how many test already hawe in DB
+                    await TestsData.find()
+                    .then(function (doc) {
+                        let testArrayOfName = []
+                        doc.forEach(function (doc) {
+                            if(!testArrayOfName.includes(doc.testName)){
+                                testArrayOfName.push(doc.testName);
+                            }
+                        });
+                        testId = testArrayOfName.length + 1;
+                    });
+
                     //Find all question witch start from *
                     let startIdx = 0;
                     let endIdx = null;
@@ -65,11 +79,11 @@ router.post('/submit', function (req, res, next) {
                             arr.push(clearStr.substring(startIdx, endIdx));
                             startIdx = i;
                         }
-                        if (i === clearStr.length -1){
+                        if (i === clearStr.length - 1){
                             arr.push(clearStr.substring(startIdx, i + 1));
                         }
                     }
-                    quizParser(arr, testName);
+                    quizParser(arr, testName, testId);
                 });
             }
         });
@@ -80,22 +94,21 @@ router.post('/submit', function (req, res, next) {
 });
 
 // Implement test parser
-function quizParser(array, testName){
+function quizParser(array, testName, testId){
     //Going throw all array and get data
     for (let i = 0; i < array.length; i++){
         //Add object to DB hiere 
         let ress = getQuestion(array[i]);
         // Create new Test object
         let newTest = TestsData();
-        //TODO: figure out how to create testId
-        newTest.testId = '111';
-
-        newTest.testName = testName;
-        //TODO: figure out how to create quizzeId
-        newTest.testsObj.quizzObj.quizzId = '222';
         
-        newTest.testsObj.quizzObj.quizzQuestion = ress.question;
-        newTest.testsObj.quizzObj.quizzAnswers = ress.ansArr;
+        newTest.testId = testId;
+        newTest.testName = testName;
+
+        newTest.quizzObj.quizzId = i + 1;
+        
+        newTest.quizzObj.quizzQuestion = ress.question;
+        newTest.quizzObj.quizzAnswers = ress.ansArr;
         // Save test to Mongo DB
         newTest.save(function(err){
             if(err) throw err;
