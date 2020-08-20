@@ -3,7 +3,9 @@ var router = express.Router();
 var TestsData = require('../models/test');
 const User = require('../models/user');
 const { find } = require('../models/test');
-const user = require('../models/user');
+//const user = require('../models/user');
+const url = require('url'); 
+const { exit } = require('process');
 
 /* GET tests page. */
 router.get('/', function(req, res, next) {
@@ -38,20 +40,54 @@ router.get('/', function(req, res, next) {
       }
 });
 
-/* TODO: 1. GET quizz by choosen testID.
-    2. Check user profile failed and passed array 
-    3. Get first or randon quizz from failed array */
-router.get('/get-tests', function(req, res, next) {
+/* TODO: 1. GET quizz by choosen testID. - DONE
+    2. Check user profile failed and passed array - DONE
+    3. Get first or randon quizz from failed array - DONE
+    4. Thinking about how to check answer and what todo next*/
+router.get('/get-tests', async function(req, res, next) {
     // Check if User is authorize if YES begin testing else go to login page
     if(req.user){
         let userName = req.user.local.userName;
+        // Checking user profile and get first failed quizzId by testId
+        async function getFailedQuizzId(){
+            await User.findOne({"local.userEmail": req.user.local.userEmail})
+            .then(function(userProfile){
+             let userAnalytics = userProfile.local.userAnalytics;
+             let failedArrayByTestId = [];
+             for(let i = 0; i < userAnalytics.length; i++){
+                 if(userAnalytics[i].testId === req.query.testId){
+                     failedArrayByTestId = userAnalytics[i].failed;
+                     break;
+                 }
+             }
+             //Check is failer array empty or not
+             if(failedArrayByTestId.length){
+                // Taking first element from failed array and get getting quizz from DB
+                getQuizzById(failedArrayByTestId[0]);
+             }
+             else{
+                 //TODO: if its hepen after all successful compleate teest 
+                 // show success mesage and offer try again
+                 console.log("Failed array is empty for current test " + failedArrayByTestId);
+             }
+            });
+        }
+        await getFailedQuizzId();
         
-        TestsData.find()
-        .then(function (doc) {
-                    console.log(doc);
-                    //res.send('respond with a resource' + doc);
-                    res.render('get_tests', {user: userName});
-                });
+        // Get quizz by quizzId frim DB
+        async function getQuizzById (failedId){
+            
+            await TestsData.findOne({"testId": req.query.testId, "quizzObj.quizzId": failedId})
+            .then(async function (doc) {
+                console.log(doc.quizzObj.quizzAnswers);
+                let question = doc.quizzObj.quizzQuestion;
+                //FIXME: figure out how to get each ansver and sei it up to html
+                let answers = doc.quizzObj.quizzAnswers;
+                
+                res.render('get_tests', {user: userName, quizzQuestion: question, quizzAnswers: answers});
+                        
+            });
+        }
     } else{
         res.redirect('/login');
     } 
@@ -74,7 +110,13 @@ router.post('/get-tests', async function(req, res, next) {
 
         if(existId){
             console.log("Test already exist");
-            res.redirect('/tests/get-tests');
+            res.redirect(url.format({
+                //FIXME: encode and decode path and testId
+                pathname:"/tests/get-tests",
+                query: {
+                   "testId": choosedTestId
+                 }
+              }));
         }
         else {
             //Going throw all test and find all test related to current test
