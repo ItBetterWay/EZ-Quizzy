@@ -5,7 +5,7 @@ const User = require('../models/user');
 const { find } = require('../models/test');
 //const user = require('../models/user');
 const url = require('url'); 
-const { exit } = require('process');
+//const { use } = require('passport');
 
 /* GET tests page. */
 router.get('/', function(req, res, next) {
@@ -38,6 +38,40 @@ router.get('/', function(req, res, next) {
             res.render('tests', { testsId: arrayOfTestId });
         });
       }
+});
+
+router.post('/check', function(req, res){
+    let userCheckedData = req.body.checkbox;
+    if(userCheckedData !== undefined){
+        //TODO: 1 Get checked answer from user
+            // 2. Compair answers with try answer
+            // 3. if answer TRY (all):
+            // 3.1 Move quizzID from failer array to passed array
+            // 3.2 go to next Quizz
+            // 4. if answer FALSE:
+            // 4.1 Show errer massage
+            // 4.2 Give chance pass the quizz again
+
+            //Check if user checked one or more answers or no one
+            // Checked multiple answers
+            if (typeof userCheckedData === "object"){
+
+                console.log("MORE")
+            } 
+            // Checked only one answer
+            else if(typeof userCheckedData === "string") {
+                console.log("ONE")
+            }
+
+            for (let key in userCheckedData){
+                console.log(userCheckedData.length);
+            }
+    }
+    else{
+        //FIXME: Process -> should be select at list one try answer 
+        console.log("User doesn't select any answers!");
+    }
+    res.redirect('/');
 });
 
 /* TODO: 1. GET quizz by choosen testID. - DONE
@@ -79,11 +113,11 @@ router.get('/get-tests', async function(req, res, next) {
             
             await TestsData.findOne({"testId": req.query.testId, "quizzObj.quizzId": failedId})
             .then(async function (doc) {
-                console.log(doc.quizzObj.quizzAnswers);
+                //console.log(doc.quizzObj.quizzAnswers);
                 let question = doc.quizzObj.quizzQuestion;
                 //FIXME: figure out how to get each ansver and sei it up to html
                 let answers = doc.quizzObj.quizzAnswers;
-                
+                console.log(answers)
                 res.render('get_tests', {user: userName, quizzQuestion: question, quizzAnswers: answers});
                         
             });

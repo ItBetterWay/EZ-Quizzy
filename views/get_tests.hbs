@@ -1,15 +1,18 @@
 <div class="jumbotron mt-5">
     <div class="container">
-        <form action="/tests/get-tests" enctype="multipart/form-data" method="post">
+        <form action="/tests/check" enctype="multipart/form-data" method="post">
         <h1 class="display-3">{{ quizzQuestion }}</h1>
 
         {{#each quizzAnswers}}
-        <div class="custom-control custom-checkbox lead">
-
-            <input type="checkbox" class="custom-control-input" id="defaultUnchecked">
-            <label class="custom-control-label" for="defaultUnchecked">{{this}}</label>
-
-        </div>
+            {{#each this}}
+                {{#if this/answer}}
+                    <!-- Default unchecked -->
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" value={{this/_id}} name="checkbox" class="custom-control-input" id={{this/_id}}>
+                        <label class="custom-control-label" for={{this/_id}}>{{this/answer}}</label>
+                    </div>
+                {{/if}}
+            {{/each}}
         {{/each}}
         <button class="btn btn-lg btn-primary mt-4" type="submit">Submit</button>
         </form>
