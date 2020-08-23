@@ -1,7 +1,13 @@
+{{#if wrongAnswer}}
+    <div class="alert alert-warning" id="success-alert">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <strong>Attention!</strong> {{ wrongAnswer }}
+    </div>
+{{/if}}
 <div class="jumbotron mt-5">
     <div class="container">
         <form action="/tests/check" enctype="multipart/form-data" method="post">
-        <h1 class="display-3">{{ quizzQuestion }}</h1>
+        <h1 class="display-3">{{ quizzQuestion }} : {{currentTestId}}</h1>
 
         {{#each quizzAnswers}}
             {{#each this}}

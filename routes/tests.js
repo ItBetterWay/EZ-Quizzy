@@ -6,7 +6,7 @@ const { find } = require('../models/test');
 //const user = require('../models/user');
 const url = require('url'); 
 //const { use } = require('passport');
-
+let CURRENT_QUIZZ = {};
 /* GET tests page. */
 router.get('/', function(req, res, next) {
     //Check if User is log In
@@ -40,8 +40,10 @@ router.get('/', function(req, res, next) {
       }
 });
 
-router.post('/check', function(req, res){
+router.post('/check', async function(req, res){
+    let wrongMsg = '';
     let userCheckedData = req.body.checkbox;
+    let userName = req.user.local.userName;
     if(userCheckedData !== undefined){
         //TODO: 1 Get checked answer from user
             // 2. Compair answers with try answer
@@ -55,23 +57,41 @@ router.post('/check', function(req, res){
             //Check if user checked one or more answers or no one
             // Checked multiple answers
             if (typeof userCheckedData === "object"){
+                console.log("MORE");
+                console.log(CURRENT_QUIZZ);
 
-                console.log("MORE")
             } 
             // Checked only one answer
             else if(typeof userCheckedData === "string") {
-                console.log("ONE")
+                console.log("ONE");
+                let answers= CURRENT_QUIZZ.quizzObj.quizzAnswers;
+                console.log(answers);
+                for(let i = 0; i < answers.length; i++){
+                    let {check, _id} = answers[i];
+                    if(check && new String(_id).valueOf() === new String(userCheckedData).valueOf()){
+                        console.log(userCheckedData + "  " + _id)
+                        console.log("CHECKED TRY");
+                        
+                    }else{
+                        console.log(userCheckedData + "  " + _id)
+                        console.log("CHECKED FALSE")
+                        wrongMsg = "CHECKED FALSE";
+                    }
+                }
             }
 
-            for (let key in userCheckedData){
-                console.log(userCheckedData.length);
-            }
+            res.render('get_tests', {user: userName, quizzQuestion: CURRENT_QUIZZ.quizzObj.quizzQuestion,
+                quizzAnswers: CURRENT_QUIZZ.quizzObj.quizzAnswers, wrongAnswer: wrongMsg});
+            // for (let key in userCheckedData){
+            //     console.log(userCheckedData.length);
+            // }
+            
     }
     else{
-        //FIXME: Process -> should be select at list one try answer 
-        console.log("User doesn't select any answers!");
+        wrongMsg = "User doesn't select any answers!";
+        res.render('get_tests', {user: userName, quizzQuestion: CURRENT_QUIZZ.quizzObj.quizzQuestion,
+            quizzAnswers: CURRENT_QUIZZ.quizzObj.quizzAnswers, wrongAnswer: wrongMsg});
     }
-    res.redirect('/');
 });
 
 /* TODO: 1. GET quizz by choosen testID. - DONE
@@ -113,11 +133,12 @@ router.get('/get-tests', async function(req, res, next) {
             
             await TestsData.findOne({"testId": req.query.testId, "quizzObj.quizzId": failedId})
             .then(async function (doc) {
+                CURRENT_QUIZZ = doc;
                 //console.log(doc.quizzObj.quizzAnswers);
                 let question = doc.quizzObj.quizzQuestion;
                 //FIXME: figure out how to get each ansver and sei it up to html
                 let answers = doc.quizzObj.quizzAnswers;
-                console.log(answers)
+                //console.log(answers)
                 res.render('get_tests', {user: userName, quizzQuestion: question, quizzAnswers: answers});
                         
             });
@@ -157,7 +178,6 @@ router.post('/get-tests', async function(req, res, next) {
             //Save all test to failed array (userAnalytics)
             let userName = req.user.local.userName;
             let question = ''
-
             let analyticsObj = {
                 testId: choosedTestId,
                 passed: [],
