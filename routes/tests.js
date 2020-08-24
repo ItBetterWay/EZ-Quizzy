@@ -45,47 +45,54 @@ router.post('/check', async function(req, res){
     let userCheckedData = req.body.checkbox;
     let userName = req.user.local.userName;
     if(userCheckedData !== undefined){
-        //TODO: 1 Get checked answer from user
-            // 2. Compair answers with try answer
-            // 3. if answer TRY (all):
-            // 3.1 Move quizzID from failer array to passed array
-            // 3.2 go to next Quizz
-            // 4. if answer FALSE:
-            // 4.1 Show errer massage
-            // 4.2 Give chance pass the quizz again
-
             //Check if user checked one or more answers or no one
             // Checked multiple answers
             if (typeof userCheckedData === "object"){
+                //TODO: figure out how to check multiple answers
                 console.log("MORE");
                 console.log(CURRENT_QUIZZ);
 
             } 
             // Checked only one answer
             else if(typeof userCheckedData === "string") {
-                console.log("ONE");
+                let oneOk = false;
                 let answers= CURRENT_QUIZZ.quizzObj.quizzAnswers;
-                console.log(answers);
+                //Going throw all try answers and compaire try answer with user answer
                 for(let i = 0; i < answers.length; i++){
                     let {check, _id} = answers[i];
                     if(check && new String(_id).valueOf() === new String(userCheckedData).valueOf()){
-                        console.log(userCheckedData + "  " + _id)
-                        console.log("CHECKED TRY");
-                        
+                        oneOk = check;
+                        break;
                     }else{
-                        console.log(userCheckedData + "  " + _id)
-                        console.log("CHECKED FALSE")
-                        wrongMsg = "CHECKED FALSE";
+                        wrongMsg = "Wrong answer please try again";
                     }
                 }
-            }
+                // If user answer OK go to next quizz else show current quizz again with error massage
+                if(oneOk){
+                    let newUserAnalytics = [];
+                    await User.findOne({"local.userEmail": req.user.local.userEmail})
+                    .then(function (doc) {
+                        for(let i = 0; i < doc.local.userAnalytics.length; i++){
+                            let currentTestObj = doc.local.userAnalytics[i];
+                            if(currentTestObj.testId === CURRENT_QUIZZ.testId){
+                               let {passed, failed} = currentTestObj;
+                               let fail = failed.shift();
+                               passed.push(fail);
+                            }
+                        }
+                        newUserAnalytics = doc.local.userAnalytics;
+                    });
+                    //Update user analytics
+                    await User.findOneAndUpdate({"local.userEmail": req.user.local.userEmail},
+                    {"local.userAnalytics": newUserAnalytics }, {new: true});
 
-            res.render('get_tests', {user: userName, quizzQuestion: CURRENT_QUIZZ.quizzObj.quizzQuestion,
-                quizzAnswers: CURRENT_QUIZZ.quizzObj.quizzAnswers, wrongAnswer: wrongMsg});
-            // for (let key in userCheckedData){
-            //     console.log(userCheckedData.length);
-            // }
-            
+                    res.render('get_tests', {user: userName, quizzQuestion: CURRENT_QUIZZ.quizzObj.quizzQuestion,
+                        quizzAnswers: CURRENT_QUIZZ.quizzObj.quizzAnswers, wrongAnswer: ''});
+                } else{
+                    res.render('get_tests', {user: userName, quizzQuestion: CURRENT_QUIZZ.quizzObj.quizzQuestion,
+                        quizzAnswers: CURRENT_QUIZZ.quizzObj.quizzAnswers, wrongAnswer: wrongMsg});
+                }
+            }
     }
     else{
         wrongMsg = "User doesn't select any answers!";
