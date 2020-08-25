@@ -6,7 +6,7 @@
 {{/if}}
 <div class="jumbotron mt-5">
     <div class="container">
-        <form action="/tests/check" enctype="multipart/form-data" method="post">
+        <form action="/tests/check" enctype="multipart/form-data" method="POST">
         <h1 class="display-3">{{ quizzQuestion }} : {{currentTestId}}</h1>
 
         {{#each quizzAnswers}}
@@ -20,7 +20,7 @@
                 {{/if}}
             {{/each}}
         {{/each}}
-        <button class="btn btn-lg btn-primary mt-4" type="submit">Submit</button>
+        <button class="btn btn-lg btn-primary mt-4" name="choosedTestId" value="{{currentTestId}}" type="submit">Submit</button>
         </form>
     </div>
 </div>
