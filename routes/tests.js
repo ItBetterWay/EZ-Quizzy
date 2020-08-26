@@ -10,32 +10,34 @@ let CURRENT_QUIZZ = {};
 router.get('/', function(req, res, next) {
     //Check if User is log In
     if(req.user){
-        TestsData.find()
-        .then(function (doc) {
-            let arrayOfTestId = []
-            doc.forEach(function (doc) {
-                if(!arrayOfTestId.includes(doc.testId)){
-                    arrayOfTestId.push(doc.testId);
-                }
-            });
-            console.log(arrayOfTestId);
-            let userName = req.user.local.userName;
-            res.render('tests', { user: userName, testsId: arrayOfTestId });
-        });
+        getAllTests(req.user.local.userName);
       } 
       //if not show all tests but start test after log In
       else {
-        TestsData.find()
+        getAllTests();       
+       }
+
+      async function getAllTests(user){
+        let arrayOfTestId = [];
+        let arrayOfObj = [];
+        await TestsData.find()
         .then(function (doc) {
-            let arrayOfTestId = []
             doc.forEach(function (doc) {
-                if(!arrayOfTestId.includes(doc.testName)){
-                    arrayOfTestId.push(doc.testName);
+                if(!arrayOfTestId.includes(doc.testId)){
+                    arrayOfTestId.push(doc.testId);
+                    let tempObj = {
+                        testId: doc.testId,
+                        testName: doc.testName
+                    }
+                    arrayOfObj.push(tempObj);
                 }
             });
-            console.log(arrayOfTestId);
-            res.render('tests', { testsId: arrayOfTestId });
         });
+        if(user){
+            res.render('tests', { user: user, testObj: arrayOfObj });
+        }else{
+            res.render('tests', { testObj: arrayOfObj });
+        }
       }
 });
 
@@ -49,13 +51,14 @@ router.post('/check', async function(req, res){
             if (typeof userCheckedData === "object"){
                 let tryAnswers = 0;
                 let trySelectAnswers = 0;
+
                 //Find how many try answers in current quizz
-                //FIXME: first time error quizzAnswer undefind
                 let answers= CURRENT_QUIZZ.quizzObj.quizzAnswers;
                 for (let i = 0; i < answers.length; i++){
                     let {check} = answers[i];
                     if(check) tryAnswers++;
                 }
+
                 //Compare selected answers with try answer
                 for (let i = 0; i < answers.length; i++){
                     let {check, _id} = answers[i];
@@ -66,6 +69,7 @@ router.post('/check', async function(req, res){
                         }
                     }
                 }
+
                 // If user answers OK go to next quizz else show current quizz again with error massage
                 if(Number(tryAnswers) === Number(userCheckedData.length) &&  Number(tryAnswers) === Number(trySelectAnswers)){
                     console.log("SUCCESS");
@@ -82,6 +86,7 @@ router.post('/check', async function(req, res){
                         }
                         newUserAnalytics = doc.local.userAnalytics;
                     });
+
                     //Update user analytics
                     await User.findOneAndUpdate({"local.userEmail": req.user.local.userEmail},
                     {"local.userAnalytics": newUserAnalytics }, {new: true});
@@ -93,7 +98,6 @@ router.post('/check', async function(req, res){
                            "testId": CURRENT_QUIZZ.testId
                          }
                       }));
-
                 } else {
                     wrongMsg = "Wrong answer please try again";
                     res.render('get_tests', {user: userName, quizzQuestion: CURRENT_QUIZZ.quizzObj.quizzQuestion,
@@ -106,11 +110,13 @@ router.post('/check', async function(req, res){
                 let oneOk = false;
                 let curentTryAnswers = 0;
                 let answers= CURRENT_QUIZZ.quizzObj.quizzAnswers;
+
                 //Ceck how meny try answers in curent quizz
                 for (let i = 0; i < answers.length; i++){
                     let {check} = answers[i];
                     if (check) curentTryAnswers++;
                 }
+
                 // Check if curent guizz has more than one try answer
                 //Going throw all try answers and compaire try answer with user answer
                 for(let i = 0; i < answers.length; i++){
@@ -142,6 +148,7 @@ router.post('/check', async function(req, res){
                         }
                         newUserAnalytics = doc.local.userAnalytics;
                     });
+
                     //Update user analytics
                     await User.findOneAndUpdate({"local.userEmail": req.user.local.userEmail},
                     {"local.userAnalytics": newUserAnalytics }, {new: true});
@@ -171,11 +178,6 @@ router.get('/get-tests', async function(req, res, next) {
     // Check if User is authorize if YES begin testing else go to login page
     if(req.user){
         let userName = req.user.local.userName;
-
-        const queryObject = url.parse(req.url, true).query;
-        console.log("QUERY IDD " + queryObject.testId);
-
-
         // Checking user profile and get first failed quizzId by testId
         async function getFailedQuizzId(){
             await User.findOne({"local.userEmail": req.user.local.userEmail})
@@ -189,20 +191,17 @@ router.get('/get-tests', async function(req, res, next) {
                      break;
                     }
                 }
-                console.log("Arr " + failedArrayByTestId.length)
-                console.log("TESTID " + req.query.testId);
-                console.log("ANALYTICS " + userAnalytics);
+
              //Check is failer array empty or not
              if(failedArrayByTestId.length){
                 // Taking first element from failed array and get getting quizz from DB
                 getQuizzById(failedArrayByTestId[0]);
              }
              else{
-                 //TODO: if its hepen after all successful compleate teest 
-                 // show success mesage and offer try again
                  console.log("Failed array is empty for current test " + failedArrayByTestId);
-
-
+                 TestsData.findOne({"testId": req.query.testId}).then(function(test){
+                    res.render('get_tests', {done: {testId: req.query.testId, testName: test.testName}});
+                 });
              }
             });
         }
@@ -210,7 +209,6 @@ router.get('/get-tests', async function(req, res, next) {
         
         // Get quizz by quizzId frim DB
         async function getQuizzById (failedId){
-            
             await TestsData.findOne({"testId": req.query.testId, "quizzObj.quizzId": failedId})
             .then(async function (doc) {
                 CURRENT_QUIZZ = doc;
@@ -277,6 +275,49 @@ router.post('/get-tests', async function(req, res, next) {
                  }
               }));
         }
+    }
+});
+// User seccessfuly done curent test and for now don't wonna repeat current test
+router.post('/done', async function(req, res, next) {
+    if(!req.user){
+        res.redirect('/login');
+    } else {
+        console.log("Test done # " + req.body.done);
+        res.redirect('/tests');
+    }
+});
+
+// User succesfully done the test and wonna repeat again current test
+router.post('/repeat', async function(req, res, next) {
+    if(!req.user){
+        res.redirect('/login');
+    } else {
+        let userAnalytics = req.user.local.userAnalytics;
+        //Swap passed array with failed array for current test
+        for(let i = 0; i < userAnalytics.length; i++){
+            let currentTestObj = userAnalytics[i];
+            let {testId, passed, failed} = currentTestObj;
+            let count = passed.length;
+            if(Number(testId) === Number(req.body.repeat)){
+                let stop = 0;
+                while(stop < count){
+                    let firstPass = passed.shift();
+                    failed.push(firstPass);
+                    stop++;
+                }
+            }
+        }
+        //Update user profile
+        await User.findOneAndUpdate({"local.userEmail": req.user.local.userEmail},
+                    {"local.userAnalytics": userAnalytics }, {new: true});
+        
+            res.redirect(url.format({
+            //FIXME: encode and decode path and testId
+            pathname:"/tests/get-tests",
+            query: {
+                "testId": req.body.repeat
+                }
+            }));
     }
 });
 

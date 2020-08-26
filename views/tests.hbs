@@ -1,11 +1,11 @@
-{{#each testsId}}
+{{#each testObj}}
 <div class="jumbotron mt-5">
     <div class="container">
-        <h1 class="display-3">Tests: {{this}}</h1>
-        <p class="lead">Analitics or let's start {{this}}</p>
+        <h1 class="display-3">Tests: {{this/testName}}</h1>
+        <p class="lead">Analitics or let's start {{this/testId}}</p>
         
         <form action="/tests/get-tests" method="POST">
-            <p><button class="btn btn-primary btn-lg" name="choosedTestId" value="{{this}}" role="button" type="submit" formmethod="POST">Get started &raquo;</button></p>
+            <p><button class="btn btn-primary btn-lg" name="choosedTestId" value="{{this/testId}}" role="button" type="submit" formmethod="POST">Get started &raquo;</button></p>
         </form>
     </div>
 </div>
