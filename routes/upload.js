@@ -17,6 +17,10 @@ router.get('/', function(req, res, next) {
 
 //Upload new document
 router.post('/submit', function (req, res, next) {
+    //Check if user is authorize if Yes subbmit else go to login page
+    if (!req.user){
+        res.redirect('/login');
+    } else {
     //get Test name from form
     let testName = req.body.testName;
 
@@ -91,6 +95,8 @@ router.post('/submit', function (req, res, next) {
         return res.status(400).send('No files were uploaded.');
     }
     res.render('upload', { title: 'EZ-Quizzy', success: 'File successfully uploaded!'});
+    }
+
 });
 
 // Implement test parser
