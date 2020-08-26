@@ -5,10 +5,6 @@ var passport = require('passport');
 
 /* GET login page. */
 router.get('/', function(req, res, next) {
-    // console.log(req.user);
-    // console.log('=======-------------');
-    // console.log(req.session);
-    //res.render('login', { message: 'Log in' });
     res.locals.message = req.flash('loginMessage');
     res.render('login');
 });

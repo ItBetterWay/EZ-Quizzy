@@ -5,16 +5,12 @@ let userSchema = mongoose.Schema({
         userName: String,
         userEmail: String,
         userPassword: String,
-        //TODO: figure out how to check and save analitics from each Test to User profile 
+
         userAnalytics: [
             {
                 testId: String,
-                passed: [{
-                    passedId: String
-                }],
-                failed: [{
-                    failedId: String 
-                }]
+                passed: Array,
+                failed: Array
             }
         ]
     }
