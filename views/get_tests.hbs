@@ -26,12 +26,11 @@
 <div class="jumbotron mt-2">
     <div class="container">
         <form action="/tests/check" enctype="multipart/form-data" method="POST">
-        <h1 class="display-3">{{ quizzQuestion }} : {{currentTestId}}</h1>
+        <p class="display-4">{{ quizzQuestion }} <!--: {{currentTestId}} --></p>
 
         {{#each quizzAnswers}}
             {{#each this}}
                 {{#if this/answer}}
-                    <!-- Default unchecked -->
                     <div class="custom-control custom-checkbox">
                         <input type="checkbox" value={{this/_id}} name="checkbox" class="custom-control-input" id={{this/_id}}>
                         <label class="custom-control-label" for={{this/_id}}>{{this/answer}}</label>

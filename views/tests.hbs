@@ -1,7 +1,7 @@
 {{#each testObj}}
 <div class="jumbotron mt-5">
     <div class="container">
-        <h1 class="display-3">Tests: {{this/testName}}</h1>
+        <h1 class="display-3">{{this/testName}}</h1>
         <p class="lead">Analitics or let's start {{this/testId}}</p>
         
         <form action="/tests/get-tests" method="POST">
