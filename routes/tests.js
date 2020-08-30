@@ -4,6 +4,7 @@ var TestsData = require('../models/test');
 const User = require('../models/user');
 const { find } = require('../models/test');
 const url = require('url'); 
+const { isObject } = require('util');
 let CURRENT_QUIZZ = {};
 
 /* GET tests page. */
@@ -16,7 +17,6 @@ router.get('/', function(req, res, next) {
       else {
         getAllTests();       
        }
-
       async function getAllTests(user){
         let arrayOfTestId = [];
         let arrayOfObj = [];
@@ -27,18 +27,38 @@ router.get('/', function(req, res, next) {
                     arrayOfTestId.push(doc.testId);
                     let tempObj = {
                         testId: doc.testId,
-                        testName: doc.testName
+                        testName: doc.testName,
+                        percentage: 0
                     }
                     arrayOfObj.push(tempObj);
                 }
             });
         });
+
         if(user){
+        // Get percentage for each test
+        await User.findOne({"local.userEmail": req.user.local.userEmail})
+        .then(await function(profile){
+            let currentAnalytics = profile.local.userAnalytics;
+            for(let i = 0; i < arrayOfObj.length; i++){
+                for(let j = 0; j < currentAnalytics.length; j++){
+                    if(currentAnalytics[j].testId === arrayOfObj[i].testId){
+                        arrayOfObj[i].percentage = getTestScore(currentAnalytics[j].passed, currentAnalytics[j].failed);
+                    }
+                }
+            }
+        });
             res.render('tests', { user: user, testObj: arrayOfObj });
         }else{
             res.render('tests', { testObj: arrayOfObj });
         }
       }
+    //Calculate compleate percentage for each test
+    function getTestScore(pass, faile){
+        let max = pass.length + faile.length;
+        let percentage = Math.round((pass.length / max) * 100);
+    return percentage;
+    }
 });
 
 router.post('/check', async function(req, res){
