@@ -1,0 +1,40 @@
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<div class="jumbotron mt-5">
+    <div class="container">
+        {{#if success}}
+        <div class="alert alert-success" id="success-alert">
+            <a href="#" class="close" data-dismiss="alert">&times;</a>
+            <strong>Success!</strong> {{ success }}
+        </div>
+        {{/if}}
+        <form action="/upload/submit" enctype="multipart/form-data" method="post">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">Enter test name</div>
+                </div>
+                <input type="text" class="form-control" name="testName" id="testName" placeholder="IT test, Biology test, etc..." required>
+            </div>
+            <div class="input-group mt-4">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+                </div>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" name="myFile" id="inputFile"
+                           aria-describedby="inputFile" required>
+                    <label class="custom-file-label" for="inputFile">Choose file</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col text-center">
+                    <button class="btn btn-lg btn-primary mt-4" type="submit" id="test">Upload</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    $('.custom-file-input').on('change', function() {
+        let fileName = $(this).val().split('\\').pop();
+        $(this).next('.custom-file-label').addClass("selected").html(fileName);
+    });
+</script>
