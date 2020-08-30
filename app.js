@@ -20,7 +20,7 @@ var loginRouter = require('./routes/login');
 var uploadRouter = require('./routes/upload');
 
 var app = express();
-const MONGODB_URI = 'mongodb+srv://quizzyAdmin:volkov007@cluster0.gfhnb.mongodb.net/ezquizzy?retryWrites=true&w=majority';
+const MONGODB_URI = 'mongodb+srv://ezquizzyAdmin:ezquizzy2020@itbetterway-cluster1.rnqw4.mongodb.net/ezquizzy?retryWrites=true&w=majority';
 
 // view engine setup
 app.engine('hbs', hbs({extname: 'hbs', defaultLayout: 'layout', layoutsDir: __dirname + '/views/layouts'}));
