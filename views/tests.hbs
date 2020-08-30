@@ -2,11 +2,20 @@
 <div class="jumbotron mt-5">
     <div class="container">
         <h1 class="display-3">{{this/testName}}</h1>
-        <p class="lead">Analitics or let's start {{this/testId}}</p>
+        {{#if this/percentage}}
+        <div class="progress mb-3">
+            <div class="progress-bar" role="progressbar" style="width: {{this/percentage}}%;"
+                aria-valuenow="{{this/percentage}}" aria-valuemin="0" aria-valuemax="100">{{this/percentage}}%</div>
+        </div>
+        <form action="/tests/get-tests" method="POST">
+            <p><button class="btn btn-primary btn-lg" name="choosedTestId" value="{{this/testId}}" role="button" type="submit" formmethod="POST">Continue &raquo;</button></p>
+        </form>
         
+        {{else}}
         <form action="/tests/get-tests" method="POST">
             <p><button class="btn btn-primary btn-lg" name="choosedTestId" value="{{this/testId}}" role="button" type="submit" formmethod="POST">Get started &raquo;</button></p>
         </form>
+        {{/if}}
     </div>
 </div>
 {{/each}}
