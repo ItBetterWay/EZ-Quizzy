@@ -1,0 +1,30 @@
+<div class="jumbotron mt-5">
+    <div class="container">
+        <div class="d-flex justify-content-center">
+            <p class="display-4">Hello dear {{userName}}!</p>
+        </div>
+        <div class="d-flex justify-content-between">
+            <p class="lead">Your email: {{email}}</p>
+            <p class="lead">Your password: {{userPassword}}</p>
+        </div>
+    </div>
+</div>
+<div class="jumbotron mt-5 pt-1 pb-1">
+    <div class="container">
+        <div class="d-flex justify-content-center">
+            <p class="display-4">Your progress:</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    {{#each userProgress}}
+        <div class="d-flex">
+            <p class="display-4">{{this/testName}}:</p>
+        </div>
+        <div class="progress mb-3">
+            <div class="progress-bar" role="progressbar" style="width: {{this/percentage}}%;"
+                aria-valuenow="{{this/percentage}}" aria-valuemin="0" aria-valuemax="100">{{this/percentage}}%</div>
+        </div>
+    {{/each}}  
+</div>

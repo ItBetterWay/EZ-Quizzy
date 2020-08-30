@@ -1,0 +1,45 @@
+{{#if wrongAnswer}}
+    <div class="alert alert-warning" id="success-alert">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <strong>Attention!</strong> {{ wrongAnswer }}
+    </div>
+{{/if}}
+
+{{#if done}}
+<div class="alert alert-success" role="alert">
+  <h4 class="alert-heading">Well done!</h4>
+  <p><h3>You successfully pass all quizzes from {{done/testName}}</h3></p>
+  <hr>
+  <p class="mb-0">You wanna try again?</p>
+  <div class="mt-5">
+    <form action="/tests/repeat" method="POST">
+        <p><button class="btn btn-secondary" name="repeat" value="{{done/testId}}" role="button" type="submit" formmethod="POST">Repeat &raquo;</button></p>
+    </form>
+
+    <form action="/tests/done" method="POST">
+        <p><button class="btn btn-success" name="done" value="{{done/testId}}" role="button" type="submit" formmethod="POST">Success &raquo;</button></p>
+    </form>
+  </div>
+</div>
+{{else}}
+
+<div class="jumbotron mt-2">
+    <div class="container">
+        <form action="/tests/check" enctype="multipart/form-data" method="POST">
+        <p class="display-4">{{ quizzQuestion }} <!--: {{currentTestId}} --></p>
+
+        {{#each quizzAnswers}}
+            {{#each this}}
+                {{#if this/answer}}
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" value={{this/_id}} name="checkbox" class="custom-control-input" id={{this/_id}}>
+                        <label class="custom-control-label" for={{this/_id}}>{{this/answer}}</label>
+                    </div>
+                {{/if}}
+            {{/each}}
+        {{/each}}
+        <button class="btn btn-lg btn-primary mt-4" name="choosedTestId" value="{{currentTestId}}" type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+{{/if}}
